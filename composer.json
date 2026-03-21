@@ -1,0 +1,34 @@
+{
+  "name": "vincentragosta/mythus",
+  "description": "WordPress platform framework — provider pattern, DI container integration, and support managers",
+  "type": "wordpress-muplugin",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.4",
+    "php-di/php-di": "^7.0"
+  },
+  "require-dev": {
+    "automattic/wordbless": "^0.4.2",
+    "phpunit/phpunit": "^9.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "Mythus\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Mythus\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "roots/wordpress-core-installer": false
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "test:unit": "phpunit --testsuite Unit",
+    "test:integration": "phpunit --testsuite Integration"
+  }
+}
