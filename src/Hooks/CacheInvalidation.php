@@ -28,9 +28,6 @@ use WP_Post;
  *    transition AND trashed_post);
  *  - isolates driver failures (a throwing driver never blocks the save or the
  *    sibling drivers), mirroring Provider::registerHooks().
- *
- * Additional drivers may be appended by any code via the 'mythus/cache_drivers'
- * filter — an escape hatch layered on top of drivers(), not the primary path.
  */
 abstract class CacheInvalidation implements Hook
 {
@@ -62,10 +59,8 @@ abstract class CacheInvalidation implements Hook
 
     public function register(): void
     {
-        /** @var mixed $drivers */
-        $drivers = apply_filters('mythus/cache_drivers', $this->drivers(), $this);
         $this->drivers = array_values(array_filter(
-            is_array($drivers) ? $drivers : [],
+            $this->drivers(),
             static fn ($driver): bool => $driver instanceof CacheDriver,
         ));
 
@@ -95,7 +90,7 @@ abstract class CacheInvalidation implements Hook
             return; // no-op; trash is handled by trashed_post
         }
 
-        $this->maybeDispatch('status_change', (int) $post->ID, $oldStatus, $newStatus);
+        $this->maybeDispatch('status_change', (int) $post->ID);
     }
 
     public function onDelete(int|string $postId): void
@@ -108,7 +103,7 @@ abstract class CacheInvalidation implements Hook
         $this->maybeDispatch('trash', (int) $postId);
     }
 
-    private function maybeDispatch(string $event, int $postId, ?string $oldStatus = null, ?string $newStatus = null): void
+    private function maybeDispatch(string $event, int $postId): void
     {
         if ($postId <= 0) {
             return;
@@ -139,7 +134,7 @@ abstract class CacheInvalidation implements Hook
         }
         $this->seen[$key] = true;
 
-        $this->dispatch(new CacheContext($event, $postId, $postType, $oldStatus, $newStatus));
+        $this->dispatch(new CacheContext($event, $postId, $postType));
     }
 
     private function dispatch(CacheContext $context): void
