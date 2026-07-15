@@ -7,6 +7,25 @@ from annotated git tags — there is no `version` field in `composer.json`.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-14
+
+### Removed
+
+- **The cache-invalidation seam** added in 1.1.0 — `Mythus\Contracts\CacheDriver`,
+  `Mythus\Support\Cache\CacheContext`, `Mythus\Support\Cache\RevalidationWebhookDriver`,
+  and `Mythus\Hooks\CacheInvalidation` (and their tests).
+
+  Rationale: a cross-property audit found **no consumer needs an event-driven cache
+  seam**. The arthouse marketing sites use a 30s nginx FastCGI microcache (TTL is the
+  correctness floor; a short-TTL microcache captures the same origin protection as
+  long-TTL+purge exactly when traffic warrants it, without purge-coverage risk or a
+  plugin dependency). vincentragosta.io/itzenzo revalidate at the sync-script layer,
+  where the real content changes originate; the `save_post` webhook only fired on
+  rarely-used manual wp-admin edits. The seam generalized the old `PurgePageCache`
+  hook, but the microcache pivot removed the thing it generalized. Removed rather than
+  carried as dormant speculative code. If a future headless consumer needs
+  save-triggered revalidation, it can be reintroduced deliberately.
+
 ## [1.1.0] - 2026-07-14
 
 ### Added
@@ -30,5 +49,6 @@ from annotated git tags — there is no `version` field in `composer.json`.
     (`blocking: false`, 2s timeout), inert when its secret is empty. Mirrors the
     established `ActivityWebhook` pattern.
 
-[Unreleased]: https://github.com/vinnyrags/mythus/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/vinnyrags/mythus/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/vinnyrags/mythus/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/vinnyrags/mythus/compare/v1.0.1...v1.1.0

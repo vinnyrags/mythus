@@ -4,6 +4,21 @@ Mythus follows [Semantic Versioning](https://semver.org/). Minor and patch
 releases are backward-compatible; breaking changes only land in major releases
 and are called out here with a migration checklist.
 
+## From 1.1.x to 1.2.0
+
+**Removes the cache-invalidation seam** (`CacheDriver`, `CacheContext`,
+`RevalidationWebhookDriver`, `CacheInvalidation`). Action is only required if a theme
+adopted it — i.e. subclassed `Mythus\Hooks\CacheInvalidation` and registered the
+subclass in a provider's `$hooks`:
+
+1. Remove the subclass from `$hooks` and delete the subclass file.
+2. Drop any `*_REVALIDATION_SECRET` define the driver relied on.
+3. If you still want save-triggered revalidation, do it in the theme (a small
+   `Hook` that fires `wp_remote_post` — mirror `ActivityWebhook`), or reintroduce the
+   seam deliberately.
+
+A theme that never adopted it needs no changes.
+
 ## From 1.0.x to 1.1.0
 
 **No action required.** 1.1.0 is purely additive. The new cache-invalidation
