@@ -7,7 +7,39 @@ from annotated git tags — there is no `version` field in `composer.json`.
 
 ## [Unreleased]
 
-## [1.2.0] - 2026-07-14
+## [1.3.0] - 2026-07-17
+
+### Added
+
+- **One-way DB + uploads sync engine** — `Mythus\Support\Sync\{SyncEnv,
+  SyncCommand, SyncCommandBuilder}`. Pulls a higher environment's database and
+  uploads DOWN into the current (lower) environment via the
+  `wp mythus sync-from <staging|production>` CLI command. Downhill-only by
+  construction (`local ← staging/production`, `staging ← production`,
+  `production ← none`) so production is never a sync target.
+
+  - **Staleness guard** in the engine (not per-site): compares the newest
+    `post_modified_gmt` on each side and refuses to pull a source that is BEHIND
+    the current env — which would silently roll it back and discard newer edits
+    (e.g. clicking "Pull from Production" pre-launch while staging is still the
+    source of truth). The admin buttons never pass `--force`, so an accidental
+    click is blocked; a deliberate rollback is CLI-only (`--force`). Fails open
+    when either clock can't be read.
+  - **Exec-env hardening** (`SyncCommandBuilder`): pins `cd`/`PATH`/`HOME` ahead
+    of the wp-cli invocation so launched subprocesses survive PHP-FPM's
+    `clear_env=yes` and inaccessible worker CWDs (the `posix_spawn()`/`sh:
+    Permission denied` regression). Shell-escapes source/actor/paths.
+  - **Inert by default**: sources and cache dirs come from the
+    `mythus/sync/sources` and `mythus/sync/cache_dirs` filters, so a site that
+    doesn't configure Sync has no valid pull target and the command errors out
+    cleanly. Snapshots the target before importing (keeps newest 3), rewrites
+    URLs serialization-safe, re-asserts non-prod `noindex`, flushes caches, and
+    records an activity log under the web-blocked `.mythus-sync` uploads dotdir.
+
+  Generalized from the AVFTB-native Sync provider so every property inherits the
+  same engine (and the staleness guard MF previously lacked). The admin UI that
+  drives it ships separately in arthouse-kit; child themes supply only their
+  droplet config via the two filters.
 
 ### Removed
 
