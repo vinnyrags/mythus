@@ -7,6 +7,17 @@ from annotated git tags — there is no `version` field in `composer.json`.
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-07-18
+
+### Fixed
+
+- **Staleness guard now works on sites with a custom table prefix.** The source-side
+  content-clock read hardcoded `wp_posts`, so on a site whose prefix isn't `wp_`
+  (e.g. a migrated site's `wp_<hash>_`) the query errored `1146 table doesn't exist`,
+  the clock came back empty, and the guard silently failed open (never fired). It now
+  reads via `wp eval` + `$wpdb->posts`, respecting the source's own prefix — matching
+  how `localContentClock()` already read the local side.
+
 ## [1.4.0] - 2026-07-17
 
 ### Added

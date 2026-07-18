@@ -187,9 +187,14 @@ final class SyncCommand
      */
     private function contentClock(array $src, bool $onDroplet): string
     {
+        // Read via wp eval + $wpdb->posts (not a hardcoded `wp_posts`) so the query
+        // respects the SOURCE's own table prefix — a custom prefix (e.g. a migrated
+        // site's wp_<hash>_) would otherwise 1146 "table doesn't exist" and silently
+        // fail the guard open. Mirrors localContentClock()'s prefix-aware read.
+        $eval   = 'global $wpdb; $v = $wpdb->get_var("SELECT MAX(post_modified_gmt) FROM {$wpdb->posts}"); echo is_string($v) ? trim($v) : "";';
         $remote = sprintf(
-            'wp db query %s --skip-column-names --path=%s --allow-root',
-            escapeshellarg('SELECT MAX(post_modified_gmt) FROM wp_posts'),
+            'wp eval %s --path=%s --allow-root',
+            escapeshellarg($eval),
             escapeshellarg($src['wp_path'])
         );
 
