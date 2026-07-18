@@ -56,4 +56,20 @@ final class SyncCommandBuilderTest extends TestCase
 
         $this->assertStringContainsString('sync-from ' . escapeshellarg($source), $cmd);
     }
+
+    public function test_omits_force_by_default(): void
+    {
+        $cmd = SyncCommandBuilder::build(self::WP, 'production', 'marc', self::ABS);
+
+        $this->assertStringNotContainsString('--force', $cmd);
+    }
+
+    public function test_appends_force_when_requested(): void
+    {
+        $cmd = SyncCommandBuilder::build(self::WP, 'production', 'marc', self::ABS, true);
+
+        // --force must ride alongside --yes (both before the escaped args) so a
+        // deliberate override skips the staleness guard.
+        $this->assertStringContainsString(' --yes --force ', $cmd);
+    }
 }

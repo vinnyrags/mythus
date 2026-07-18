@@ -36,17 +36,20 @@ final class SyncCommandBuilder
      * @param string $source  Source env to pull from (already gate-checked upstream).
      * @param string $actor   Who triggered the pull (recorded in the activity log).
      * @param string $abspath WordPress ABSPATH — the accessible CWD/HOME and --path.
+     * @param bool   $force   Override the staleness guard (a deliberate rollback). A
+     *                        UI must only set this after an explicit, informed confirm.
      */
-    public static function build(string $wp, string $source, string $actor, string $abspath): string
+    public static function build(string $wp, string $source, string $actor, string $abspath, bool $force = false): string
     {
         return sprintf(
-            'cd %s && PATH=%s HOME=%s %s %s %s --yes --actor=%s --path=%s --allow-root 2>&1',
+            'cd %s && PATH=%s HOME=%s %s %s %s --yes%s --actor=%s --path=%s --allow-root 2>&1',
             escapeshellarg($abspath),
             escapeshellarg(self::PATH),
             escapeshellarg($abspath),
             escapeshellarg($wp),
             self::COMMAND,
             escapeshellarg($source),
+            $force ? ' --force' : '',
             escapeshellarg($actor),
             escapeshellarg($abspath)
         );

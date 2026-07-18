@@ -7,6 +7,26 @@ from annotated git tags — there is no `version` field in `composer.json`.
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-07-17
+
+### Added
+
+- **Sync staleness guard is now overridable through a UI, not just the CLI.**
+  Two small seams so an admin surface can offer an informed override instead of
+  forcing the operator to SSH in:
+
+  - `SyncCommandBuilder::build()` takes an optional `bool $force` that appends
+    `--force` to the generated command.
+  - `SyncCommand::EXIT_STALE` (3) — the staleness refusal now exits with this
+    distinct code (via `WP_CLI::error(..., 3)`) instead of the generic 1, so a
+    caller can tell "the guard blocked me, offer an override" apart from "the pull
+    actually failed". The refusal message drops its CLI-specific "re-run from the
+    CLI" wording since the override is no longer CLI-only.
+
+  The guard itself is unchanged — it still blocks by default and still snapshots
+  the target before any import; this only makes the deliberate override reachable
+  from a button (see arthouse-kit's Migration tab).
+
 ## [1.3.0] - 2026-07-17
 
 ### Added

@@ -18,6 +18,13 @@ use WP_CLI;
 final class SyncCommand
 {
     /**
+     * Exit code for the staleness refusal — distinct from the generic error (1) so
+     * a UI driving this command can tell "the guard blocked me, offer an override"
+     * apart from "something actually broke". Kept in sync with any REST/admin caller.
+     */
+    public const EXIT_STALE = 3;
+
+    /**
      * Pull production/staging down into the current environment.
      *
      * ## OPTIONS
@@ -75,13 +82,13 @@ final class SyncCommand
             WP_CLI::error(sprintf(
                 "Refusing to pull: %s was last edited %s UTC, but this %s environment has NEWER content (%s UTC). "
                 . 'Pulling would roll %s back and discard those newer edits. '
-                . 'If this rollback is intentional, re-run from the CLI with --force.',
+                . 'If this rollback is intentional, re-run with --force.',
                 $source,
                 $srcClock,
                 $env,
                 $targetClock,
                 $env
-            ));
+            ), self::EXIT_STALE);
         }
 
         WP_CLI::confirm("This OVERWRITES the current ({$env}) database + uploads with {$source}. Continue?", $assoc);
