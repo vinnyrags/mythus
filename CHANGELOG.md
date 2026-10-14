@@ -7,6 +7,16 @@ from annotated git tags — there is no `version` field in `composer.json`.
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-10-14
+
+### Fixed
+
+- **`composer test` runs again.** `phpunit.xml` declared an `Integration` test suite whose
+  directory (`tests/Integration`) has never existed, so PHPUnit stopped with "Test directory …
+  not found" (exit 2) before running anything — here and in every site that runs Mythus's tests
+  from its vendored copy. The empty suite and its `test:integration` script are removed; the
+  Unit suite is unchanged. Test configuration only — no runtime change.
+
 ## [1.4.1] - 2026-07-18
 
 ### Fixed
@@ -112,6 +122,10 @@ from annotated git tags — there is no `version` field in `composer.json`.
     (`blocking: false`, 2s timeout), inert when its secret is empty. Mirrors the
     established `ActivityWebhook` pattern.
 
-[Unreleased]: https://github.com/vinnyrags/mythus/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/vinnyrags/mythus/compare/v1.4.2...HEAD
+[1.4.2]: https://github.com/vinnyrags/mythus/compare/v1.4.1...v1.4.2
+[1.4.1]: https://github.com/vinnyrags/mythus/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/vinnyrags/mythus/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/vinnyrags/mythus/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/vinnyrags/mythus/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/vinnyrags/mythus/compare/v1.0.1...v1.1.0
